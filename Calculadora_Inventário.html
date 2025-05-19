@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Custo de Inventário</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+    <style>
+        :root {
+            /* Paleta de Cores Sóbrias */
+            --primary: #004080;       /* Azul Marinho Clássico */
+            --primary-dark: #002f5c;  /* Azul Marinho Mais Escuro */
+            --accent: #0059b3;        /* Azul Sóbrio para Gradiente/Destaque */
+            
+            --danger: #dc2626;        /* Vermelho para Perigo/Não */
+            --success: #16a34a;      /* Verde para Sucesso/Sim */
+            --warning: #f59e0b;
+            
+            --light: #f8fafc;        /* Fundo Principal Claro */
+            --dark: #1e293b;         /* Texto Escuro Principal / Elementos Escuros */
+            --text: #334155;         /* Cor de Texto Padrão */
+            --text-light: #64748b;   /* Cor de Texto Mais Clara / Placeholders */
+            --border: #e2e8f0;       /* Cor da Borda Padrão */
+            --shadow: rgba(0, 0, 0, 0.05); /* Sombra Suave */
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem; 
+        }
+        
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow);
+            overflow: hidden; 
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 1.5rem 0 1rem 0; 
+            background-color: #ffffff; 
+            border-bottom: 1px solid var(--border); 
+        }
+
+        .logo-container img {
+            max-width: 90%;   
+            width: auto;      
+            height: auto;     
+            display: block; 
+            margin: 0 auto;   
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 2rem 2rem; 
+            text-align: center;
+            color: white; 
+        }
+        
+        .header h1 {
+            font-size: 1.75rem; /* Aumentado um pouco para dar mais destaque já que não tem subtítulo */
+            font-weight: 700;
+            /* margin-bottom: 0.5rem; */ /* Removido ou ajustado se o <p> for removido */
+            line-height: 1.3;
+        }
+        
+        /* .header p {  Comentado ou Removido se o <p> for completamente removido
+            opacity: 0.9;
+            font-size: 0.95rem; 
+        } */
+        
+        .form-container {
+            padding: 2rem;
+        }
+
+        .message-box {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none; 
+            border: 1px solid transparent;
+        }
+        .message-box.error {
+            background-color: #fee2e2; 
+            color: #b91c1c; 
+            border-color: #fca5a5; 
+            display: block;
+        }
+        .message-box.success {
+            background-color: #dcfce7; 
+            color: #15803d; 
+            border-color: #86efac; 
+            display: block;
+        }
+         .message-box.info {
+            background-color: #e0f2fe; 
+            color: #075985; 
+            border-color: #7dd3fc; 
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--dark);
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.15); 
+        }
+        
+        input::placeholder {
+            color: var(--text-light);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; 
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 89, 179, 0.3); 
+        }
+        
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-sim {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-sim:hover {
+            background-color: #14833f; 
+            transform: translateY(-1px);
+        }
+        
+        .btn-nao {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-nao:hover {
+            background-color: #c02222; 
+            transform: translateY(-1px);
+        }
+        
+        .results {
+            margin-top: 2.5rem;
+            background-color: var(--light); 
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .results h3 {
+            color: var(--dark);
+            font-size: 1.25rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .result-value {
+            font-weight: 500;
+        }
+        
+        .total-result {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .highlight {
+            color: var(--primary); 
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .critical {
+            color: var(--danger); 
+            font-weight: 700;
+        }
+
+        .question-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .question {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .final-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: #e6f0ff; 
+            border-radius: 12px;
+            border-left: 4px solid var(--primary); 
+        }
+        
+        .perda-patrimonial {
+            display: inline-block;
+            background-color: #fee2e2; 
+            color: var(--danger);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* Tooltip Styles */
+        .tooltip-icon {
+            margin-left: 8px;
+            color: var(--text-light);
+            cursor: help;
+            font-size: 0.9em;
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block; 
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--dark);
+            color: var(--light);
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; 
+            left: 50%;
+            margin-left: -110px; 
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            font-weight: normal;
+            line-height: 1.4;
+        }
+
+        .tooltip-text::after { 
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark) transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text,
+        .tooltip-icon:focus + .tooltip-text { 
+            visibility: visible;
+            opacity: 1;
+        }
+         label .tooltip-container { 
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.5rem;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .tooltip-text { 
+                width: 180px;
+                margin-left: -90px;
+            }
+            .logo-container img { 
+                 max-width: 95%; 
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            /* .header p {  Comentado ou Removido se o <p> for completamente removido
+                font-size: 0.9rem;
+            } */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="Logo_Horiz_CPGADV.png" alt="Logo Clemente Pompeu e Gomes Advogados">
+            </div>
+        <div class="header">
+            <h1>Calculadora de Custo de Inventário</h1>
+            </div>
+        
+        <div class="form-container">
+            <div id="message-area" class="message-box"></div>
+
+            <div class="form-group">
+                <label for="imoveis">
+                    Valor de mercado estimado dos bens imóveis
+                    <div class="tooltip-container">
+                        <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                        <span class="tooltip-text">Informe a soma dos valores de mercado atuais de todos os imóveis (casas, apartamentos, terrenos, etc.) deixados pelo falecido.</span>
+                    </div>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="imoveis" placeholder="Ex: R$ 5.000.000,00" oninput="handleInitialInputChange()">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="outros">
+                    Valor de mercado estimado dos demais bens
+                    <div class="tooltip-container">
+                        <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                        <span class="tooltip-text">Informe a soma dos valores de mercado de outros bens, como veículos, joias, obras de arte, saldos bancários, investimentos, etc.</span>
+                    </div>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="outros" placeholder="Ex: R$ 1.000.000,00" oninput="handleInitialInputChange()">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="aliquota">
+                    Alíquota de ITCMD
+                     <div class="tooltip-container">
+                        <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                        <span class="tooltip-text">Imposto sobre Transmissão Causa Mortis e Doação. A alíquota varia por estado e pode ser progressiva. Insira a alíquota aplicável (ex: 4% ou 8%).</span>
+                    </div>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="aliquota" placeholder="Ex: 8,0%" oninput="handleInitialInputChange()">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="honorarios">
+                    Percentual de honorários advocatícios
+                    <div class="tooltip-container">
+                        <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                        <span class="tooltip-text">Percentual cobrado pelo advogado sobre o valor total do patrimônio. Consulte a tabela da OAB do seu estado ou o contrato com o profissional.</span>
+                    </div>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="honorarios" placeholder="Ex: 10,0%" oninput="handleInitialInputChange()">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="calcular()">
+                <i class="fas fa-calculator"></i>
+                Calcular Custos Iniciais
+            </button>
+            
+            <div id="resultado-inicial" class="hidden"></div>
+            <div id="pergunta-herdeiro" class="hidden"></div>
+            <div id="resposta-final-sim" class="hidden"></div>
+            
+            <div id="secao-venda-bem" class="hidden">
+                <div class="form-group">
+                    <label for="valor-venda">
+                        Qual o valor de mercado do bem que precisará ser vendido?
+                        <div class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                            <span class="tooltip-text">Se for necessário vender um bem para pagar o inventário, informe o valor de mercado estimado deste bem específico.</span>
+                        </div>
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="valor-venda" placeholder="Ex: R$ 1.000.000,00">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="calcularDesagio()">Calcular Deságio da Venda</button>
+            </div>
+            
+            <div id="secao-aquisicao-bem" class="hidden">
+                <div class="form-group">
+                    <label for="valor-aquisicao">
+                        Por qual valor esse bem foi adquirido (valor histórico)?
+                        <div class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                            <span class="tooltip-text">Informe o valor pelo qual o bem (que será vendido) foi originalmente adquirido ou declarado no Imposto de Renda do falecido. Isso é usado para calcular o ganho de capital.</span>
+                        </div>
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="valor-aquisicao" placeholder="Ex: R$ 500.000,00">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="calcularIR()">Calcular Imposto de Renda sobre Ganho</button>
+            </div>
+            
+            <div id="resultado-venda-ir" class="hidden"></div>
+            <div id="resultado-final-venda" class="hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais para armazenar valores intermediários
+        let custoInventarioInicialGlobal = 0;
+        let valorTotalPatrimonioGlobal = 0;
+        let valorVendaComDesagioGlobal = 0;
+        let valorAquisicaoGlobal = 0; 
+        let irSobreGanhoCapitalGlobal = 0;
+        let desagioGlobal = 0;
+        let calculoInicialFeito = false;
+
+
+        // Helper para mostrar mensagens
+        function showMessage(message, type = 'error') {
+            const messageArea = document.getElementById('message-area');
+            messageArea.textContent = message;
+            messageArea.className = `message-box ${type}`; 
+            messageArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function hideMessage() {
+            const messageArea = document.getElementById('message-area');
+            messageArea.textContent = '';
+            messageArea.className = 'message-box'; 
+        }
+
+        // Funções para mostrar/esconder seções
+        function showSection(sectionId) {
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+        function hideSection(sectionId) {
+            document.getElementById(sectionId).classList.add('hidden');
+        }
+        function hideAllOptionalSections() {
+            hideSection('resultado-inicial');
+            hideSection('pergunta-herdeiro');
+            hideSection('resposta-final-sim');
+            hideSection('secao-venda-bem');
+            hideSection('secao-aquisicao-bem');
+            hideSection('resultado-venda-ir');
+            hideSection('resultado-final-venda');
+        }
+
+        // Lidar com mudança nos inputs iniciais para forçar recálculo
+        function handleInitialInputChange() {
+            if (calculoInicialFeito) {
+                hideMessage();
+                hideAllOptionalSections();
+                calculoInicialFeito = false; 
+            }
+        }
+
+
+        // Aplicação de Máscaras (Cleave.js)
+        function aplicarMascaraMoeda(selector) {
+            new Cleave(selector, {
+                prefix: 'R$ ',
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalMark: ',',
+                delimiter: '.',
+                numeralDecimalScale: 2,
+                numeralIntegerScale: 12,
+                rawValueTrimPrefix: true
+            });
+        }
+
+        aplicarMascaraMoeda('#imoveis');
+        aplicarMascaraMoeda('#outros');
+        aplicarMascaraMoeda('#valor-venda');
+        aplicarMascaraMoeda('#valor-aquisicao');
+
+        new Cleave('#aliquota', {
+            suffix: '%',
+            numeral: true,
+            numeralDecimalMark: ',',
+            delimiter: '',
+            numeralDecimalScale: 2, 
+            numeralIntegerScale: 2,
+            rawValueTrimPrefix: true 
+        });
+
+        new Cleave('#honorarios', {
+            suffix: '%',
+            numeral: true,
+            numeralDecimalMark: ',',
+            delimiter: '',
+            numeralDecimalScale: 2, 
+            numeralIntegerScale: 2,
+            rawValueTrimPrefix: true 
+        });
+
+        // Funções de Desformatação
+        function desformatarMoeda(valorString) {
+            if (!valorString) return NaN;
+            const valorLimpo = valorString.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+            return parseFloat(valorLimpo);
+        }
+
+        function desformatarPercentual(valorString) {
+            if (!valorString) return NaN;
+            const valorLimpo = valorString.replace("%", "").replace(",", ".");
+            return parseFloat(valorLimpo);
+        }
+
+        // Função para formatar número para moeda brasileira
+        function formatarMoeda(valor) {
+            if (isNaN(valor)) return "R$ -";
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        
+        function formatarPercentual(valor) {
+            if (isNaN(valor)) return "- %";
+            return valor.toFixed(2).replace(".", ",") + "%";
+        }
+
+
+        // Cálculo Principal
+        function calcular() {
+            hideMessage();
+            hideAllOptionalSections(); 
+
+            const imoveis = desformatarMoeda(document.getElementById('imoveis').value);
+            const outros = desformatarMoeda(document.getElementById('outros').value);
+            const aliquotaITCMD = desformatarPercentual(document.getElementById('aliquota').value);
+            const percHonorarios = desformatarPercentual(document.getElementById('honorarios').value);
+
+            if (isNaN(imoveis) || isNaN(outros) || isNaN(aliquotaITCMD) || isNaN(percHonorarios)) {
+                showMessage("Por favor, preencha todos os campos iniciais com valores válidos.");
+                return;
+            }
+            if (imoveis < 0 || outros < 0 || aliquotaITCMD < 0 || percHonorarios < 0) {
+                showMessage("Os valores não podem ser negativos.");
+                return;
+            }
+            if (aliquotaITCMD > 100 || percHonorarios > 100) {
+                showMessage("As alíquotas e percentuais não podem ser maiores que 100%.");
+                return;
+            }
+
+            valorTotalPatrimonioGlobal = imoveis + outros;
+            if (valorTotalPatrimonioGlobal === 0 && (imoveis > 0 || outros > 0)) { 
+                 valorTotalPatrimonioGlobal = Math.max(imoveis, outros);
+            } else if (valorTotalPatrimonioGlobal === 0) {
+                 showMessage("O valor total do patrimônio não pode ser zero se houver bens. Verifique os valores.", "info");
+            }
+
+
+            const itcmd = valorTotalPatrimonioGlobal * (aliquotaITCMD / 100);
+            let cartorio = valorTotalPatrimonioGlobal * 0.005; 
+            if (valorTotalPatrimonioGlobal > 0 && valorTotalPatrimonioGlobal <= 50000) cartorio = Math.min(cartorio, 1000); 
+            else if (valorTotalPatrimonioGlobal > 50000 && valorTotalPatrimonioGlobal <= 200000) cartorio = Math.min(cartorio, 3000);
+            else cartorio = Math.min(cartorio, 90000); 
+            if (valorTotalPatrimonioGlobal === 0) cartorio = 0;
+
+
+            const certidoes = valorTotalPatrimonioGlobal > 0 ? 2000 : 0; 
+            
+            let registroImoveis = imoveis * 0.0075; 
+            if (imoveis > 0 && imoveis <= 50000) registroImoveis = Math.min(registroImoveis, 800);
+            else if (imoveis > 50000 && imoveis <= 200000) registroImoveis = Math.min(registroImoveis, 2500);
+            else registroImoveis = Math.min(registroImoveis, 90000); 
+            if (imoveis === 0) registroImoveis = 0;
+
+
+            const honorariosAdv = valorTotalPatrimonioGlobal * (percHonorarios / 100);
+            
+            custoInventarioInicialGlobal = itcmd + cartorio + certidoes + registroImoveis + honorariosAdv;
+            const perdaPatrimonialPercentual = valorTotalPatrimonioGlobal > 0 ? (custoInventarioInicialGlobal / valorTotalPatrimonioGlobal) * 100 : 0;
+
+            const resultadoDiv = document.getElementById('resultado-inicial');
+            resultadoDiv.innerHTML = `
+                <div class="results">
+                    <h3>Custos Iniciais Estimados do Inventário</h3>
+                    <div class="result-item">
+                        <span>Valor Total do Patrimônio:</span>
+                        <span class="result-value">${formatarMoeda(valorTotalPatrimonioGlobal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>ITCMD (${formatarPercentual(aliquotaITCMD)}):
+                            <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">Cálculo: ${formatarMoeda(valorTotalPatrimonioGlobal)} * ${formatarPercentual(aliquotaITCMD)}</span>
+                            </div>
+                        </span>
+                        <span class="result-value">${formatarMoeda(itcmd)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Cartório de Notas (Estimado):
+                            <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">Estimativa baseada no valor do patrimônio, com tetos aplicáveis. Varia significativamente por estado.</span>
+                            </div>
+                        </span>
+                        <span class="result-value">${formatarMoeda(cartorio)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Certidões (Estimado):</span>
+                        <span class="result-value">${formatarMoeda(certidoes)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Registro de Imóveis (Estimado):
+                             <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">Estimativa sobre o valor dos imóveis, com tetos. Necessário para transferir a propriedade. Varia por estado.</span>
+                            </div>
+                        </span>
+                        <span class="result-value">${formatarMoeda(registroImoveis)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Honorários Advocatícios (${formatarPercentual(percHonorarios)}):
+                            <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">Cálculo: ${formatarMoeda(valorTotalPatrimonioGlobal)} * ${formatarPercentual(percHonorarios)}</span>
+                            </div>
+                        </span>
+                        <span class="result-value">${formatarMoeda(honorariosAdv)}</span>
+                    </div>
+                    <div class="total-result">
+                        <div class="result-item">
+                            <span>Custo Total Estimado do Inventário:</span>
+                            <span class="highlight">${formatarMoeda(custoInventarioInicialGlobal)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Perda Patrimonial Inicial:</span>
+                            <span class="perda-patrimonial">${formatarPercentual(perdaPatrimonialPercentual)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showSection('resultado-inicial');
+            
+            if (custoInventarioInicialGlobal > 0) {
+                showSection('pergunta-herdeiro');
+                document.getElementById('pergunta-herdeiro').innerHTML = `
+                    <div class="question-section">
+                        <div class="question">O(s) herdeiro(s) possui(em) este valor (${formatarMoeda(custoInventarioInicialGlobal)}) para pagar pelo inventário ou algum bem do espólio terá que ser vendido?</div>
+                        <div class="btn-group">
+                            <button class="btn btn-sim" onclick="responderSim()">
+                                <i class="fas fa-check"></i> Sim, ele(s) possui(em)
+                            </button>
+                            <button class="btn btn-nao" onclick="responderNao()">
+                                <i class="fas fa-times"></i> Não, algo terá que ser vendido
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                responderSim(); 
+                const respostaDiv = document.getElementById('resposta-final-sim');
+                respostaDiv.innerHTML = `
+                <div class="final-result" style="margin-top: 1rem;">
+                    <p><strong>Conclusão:</strong> Com base nos valores fornecidos, o custo estimado do inventário é de <strong>${formatarMoeda(custoInventarioInicialGlobal)}</strong>.</p>
+                    <p style="margin-top: 0.75rem; font-weight: 600; text-align: center;">FIM DA SIMULAÇÃO</p>
+                </div>`;
+            }
+
+            calculoInicialFeito = true;
+            resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function responderSim() {
+            hideMessage();
+            hideSection('pergunta-herdeiro');
+            hideSection('secao-venda-bem');
+            hideSection('secao-aquisicao-bem');
+            hideSection('resultado-venda-ir');
+            hideSection('resultado-final-venda');
+
+            const respostaDiv = document.getElementById('resposta-final-sim');
+            if (custoInventarioInicialGlobal > 0) {
+                respostaDiv.innerHTML = `
+                    <div class="final-result" style="margin-top: 1rem;">
+                        <p><strong>Conclusão:</strong> O custo total estimado para realizar o Inventário é de <strong>${formatarMoeda(custoInventarioInicialGlobal)}</strong>. Como os herdeiros possuem este valor, não há necessidade de considerar custos adicionais com a venda de bens.</p>
+                        <p style="margin-top: 0.75rem; font-weight: 600; text-align: center;">FIM DA SIMULAÇÃO</p>
+                    </div>
+                `;
+            } else {
+                 respostaDiv.innerHTML = `
+                    <div class="final-result" style="margin-top: 1rem;">
+                        <p><strong>Conclusão:</strong> Com base nos valores fornecidos, o custo estimado do inventário é de <strong>${formatarMoeda(custoInventarioInicialGlobal)}</strong>.</p>
+                        <p style="margin-top: 0.75rem; font-weight: 600; text-align: center;">FIM DA SIMULAÇÃO</p>
+                    </div>
+                `;
+            }
+            showSection('resposta-final-sim');
+            respostaDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function responderNao() {
+            hideMessage();
+            hideSection('pergunta-herdeiro');
+            hideSection('resposta-final-sim');
+            showSection('secao-venda-bem');
+            hideSection('secao-aquisicao-bem');
+            hideSection('resultado-venda-ir');
+            hideSection('resultado-final-venda');
+            document.getElementById('secao-venda-bem').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function calcularDesagio() {
+            hideMessage();
+            hideSection('secao-aquisicao-bem');
+            hideSection('resultado-final-venda'); 
+            
+            const resultadoVendaIrDiv = document.getElementById('resultado-venda-ir');
+            const irSection = resultadoVendaIrDiv.querySelector('.ir-details'); 
+            if (irSection) {
+                irSection.remove();
+            }
+             const btnVerCustoFinal = resultadoVendaIrDiv.querySelector('button');
+            if (btnVerCustoFinal && btnVerCustoFinal.textContent.includes("Ver Custo Total Final")) {
+                btnVerCustoFinal.remove();
+            }
+
+
+            const valorVendaInput = document.getElementById('valor-venda').value;
+            const valorVendaOriginal = desformatarMoeda(valorVendaInput);
+
+            if (isNaN(valorVendaOriginal) || valorVendaOriginal <= 0) {
+                showMessage("Por favor, insira um valor de mercado válido para o bem a ser vendido.");
+                hideSection('secao-aquisicao-bem'); 
+                return;
+            }
+            
+            desagioGlobal = valorVendaOriginal * 0.20; 
+            valorVendaComDesagioGlobal = valorVendaOriginal - desagioGlobal;
+            
+            const resultadoVendaDiv = document.getElementById('resultado-venda-ir'); 
+            resultadoVendaDiv.innerHTML = `
+                <div class="results" style="margin-top:1rem;">
+                    <h3>Impacto da Venda do Bem</h3>
+                    <div class="result-item">
+                        <span>Valor de Mercado do Bem:</span>
+                        <span class="result-value">${formatarMoeda(valorVendaOriginal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span style="color: var(--danger);">Deságio Estimado (20%):
+                            <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">É comum que bens vendidos apressadamente durante um inventário sofram uma desvalorização (deságio) no preço de venda. Estimamos 20%.</span>
+                            </div>
+                        </span>
+                        <span class="result-value" style="color: var(--danger);">- ${formatarMoeda(desagioGlobal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Valor Efetivo da Venda (com deságio):</span>
+                        <span class="result-value highlight">${formatarMoeda(valorVendaComDesagioGlobal)}</span>
+                    </div>
+                </div>
+            `; 
+            showSection('resultado-venda-ir');
+            showSection('secao-aquisicao-bem');
+            document.getElementById('secao-aquisicao-bem').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function calcularIR() {
+            hideMessage();
+            hideSection('resultado-final-venda'); 
+
+            const valorAquisicaoInput = document.getElementById('valor-aquisicao').value;
+            valorAquisicaoGlobal = desformatarMoeda(valorAquisicaoInput);
+
+            if (isNaN(valorAquisicaoGlobal) || valorAquisicaoGlobal < 0) {
+                showMessage("Por favor, insira um valor de aquisição válido.");
+                return;
+            }
+
+            const ganhoCapital = Math.max(0, valorVendaComDesagioGlobal - valorAquisicaoGlobal);
+            let aliquotaIRPercentual = 0; 
+            
+            if (ganhoCapital > 0) {
+                if (ganhoCapital <= 5000000) aliquotaIRPercentual = 15;
+                else if (ganhoCapital <= 10000000) aliquotaIRPercentual = 17.5;
+                else if (ganhoCapital <= 30000000) aliquotaIRPercentual = 20;
+                else aliquotaIRPercentual = 22.5;
+            }
+            
+            irSobreGanhoCapitalGlobal = ganhoCapital * (aliquotaIRPercentual / 100);
+            
+            const resultadoVendaIrDiv = document.getElementById('resultado-venda-ir');
+            const existingButton = resultadoVendaIrDiv.querySelector('button.btn-primary');
+            if (existingButton && existingButton.textContent.includes("Ver Custo Total Final")) {
+                existingButton.remove();
+            }
+            const existingIRDetails = resultadoVendaIrDiv.querySelector('.ir-details-section');
+            if (existingIRDetails) {
+                existingIRDetails.remove();
+            }
+
+
+            resultadoVendaIrDiv.innerHTML += `
+                <div class="results ir-details-section" style="margin-top: 1rem;">
+                     <div class="result-item">
+                        <span>Valor de Aquisição do Bem (Histórico):</span>
+                        <span class="result-value">${formatarMoeda(valorAquisicaoGlobal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Ganho de Capital Tributável:
+                            <div class="tooltip-container">
+                                <i class="fas fa-question-circle tooltip-icon" tabindex="0"></i>
+                                <span class="tooltip-text">Diferença entre o valor efetivo da venda (com deságio) e o valor de aquisição. Se negativo ou zero, não há imposto.</span>
+                            </div>
+                        </span>
+                        <span class="result-value">${formatarMoeda(ganhoCapital)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Alíquota de IR sobre Ganho de Capital:</span>
+                        <span class="result-value">${formatarPercentual(aliquotaIRPercentual)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span style="color: var(--danger);">Imposto de Renda Devido (sobre Ganho de Capital):</span>
+                        <span class="result-value" style="color: var(--danger);">${formatarMoeda(irSobreGanhoCapitalGlobal)}</span>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 1.5rem;" onclick="mostrarCustosFinaisComVenda()">
+                        <i class="fas fa-poll"></i> Ver Custo Total Final do Inventário
+                    </button>
+                </div>
+            `;
+             if (valorAquisicaoGlobal > valorVendaComDesagioGlobal && ganhoCapital === 0) {
+                 showMessage("O valor de aquisição é maior ou igual ao valor de venda com deságio. Não haverá ganho de capital a ser tributado.", "info");
+            }
+            document.getElementById('resultado-venda-ir').lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        
+        function mostrarCustosFinaisComVenda() {
+            hideMessage();
+            const custoTotalFinal = custoInventarioInicialGlobal + desagioGlobal + irSobreGanhoCapitalGlobal;
+            const perdaPatrimonialFinalPercentual = valorTotalPatrimonioGlobal > 0 ? (custoTotalFinal / valorTotalPatrimonioGlobal) * 100 : 0;
+
+            const resultadoFinalDiv = document.getElementById('resultado-final-venda');
+            resultadoFinalDiv.innerHTML = `
+                <div class="results" style="margin-top: 1.5rem; background-color: #fef2f2; border-left: 4px solid var(--danger);">
+                    <h3>Custos Finais do Inventário (Considerando Venda de Bem)</h3>
+                    <div class="result-item">
+                        <span>Custo Inicial Estimado do Inventário:</span>
+                        <span class="result-value">${formatarMoeda(custoInventarioInicialGlobal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>(+) Deságio da Venda do Bem:</span>
+                        <span class="result-value">${formatarMoeda(desagioGlobal)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>(+) IR sobre Ganho de Capital:</span>
+                        <span class="result-value">${formatarMoeda(irSobreGanhoCapitalGlobal)}</span>
+                    </div>
+                    <div class="total-result">
+                        <div class="result-item">
+                            <span>Custo Total Final Estimado do Inventário:</span>
+                            <span class="critical" style="font-size: 1.2rem;">${formatarMoeda(custoTotalFinal)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Nova Perda Patrimonial Total:</span>
+                            <span class="perda-patrimonial" style="background-color: #fee2e2; font-size: 1.1rem;">${formatarPercentual(perdaPatrimonialFinalPercentual)}</span>
+                        </div>
+                    </div>
+                     <p style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center;">Este é o custo total considerando a necessidade de vender um bem do espólio, incluindo o deságio da venda e o imposto de renda sobre o ganho de capital.</p>
+                     <p style="margin-top: 0.75rem; font-weight: 600; text-align: center;">FIM DA SIMULAÇÃO</p>
+                </div>
+            `;
+            showSection('resultado-final-venda');
+            resultadoFinalDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Inicialização: Esconder todas as seções opcionais ao carregar e adicionar listeners
+        window.onload = function() {
+            hideAllOptionalSections();
+            document.getElementById('imoveis').addEventListener('input', handleInitialInputChange);
+            document.getElementById('outros').addEventListener('input', handleInitialInputChange);
+            document.getElementById('aliquota').addEventListener('input', handleInitialInputChange);
+            document.getElementById('honorarios').addEventListener('input', handleInitialInputChange);
+        };
+
+    </script>
+</body>
+</html>
